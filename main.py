@@ -11,28 +11,33 @@ class ImageOptimizerHandler (FileSystemEventHandler):
     def on_created(self, event):
         if event.is_directory:
             return
-        if event.src_path.lower().endswith(".jpeg",".png",".jpg"):
+        if event.src_path.lower().endswith(".jpeg", ".png", ".jpg"):
             self.optimize_event(event.src_path)
 
     def optimize_event(self, file_path):
         try:
             with Image.open(file_path) as img:
-                if img_width > MAX_WIDTH:
+                if img.width > MAX_WIDTH:
                     ratio = MAX_WIDTH / img.width
-                    new_size = (MAX_WIDTH,  int(img_height*ratio))
+                    new_size = (MAX_WIDTH,  int(img.height*ratio))
                     img = img.resize(new_size, Image.ANTIALIAS)
                 
                 optimized_path = os.path.join(OPTIMIZED_FOLDER, os.path.basename(file_path))
 
                 if img.mode in ("RGBA", "P"):
                     img = img.convert("RGB")
-                    optimized_path = optimized_path.rsplit(".",1)[0] + ".jpg"
+                    temp_path = optimized_path.rsplit(".",1)[0] + ".jpg"
 
                 img.save(optimized_path, "JPEG", quality=QUALITY)
+                optimized_size = os.path.getsize(temp_path)
+
                 print(f"Optimized: {file_path}=>{optimized_path}")
 
+               # if optimized_size< original_size:
+
+
         except Exception as e:
-            print(f"error processing {file_path: {e}}")
+            print(f"error processing {file_path}: {e}")
 
 
 
