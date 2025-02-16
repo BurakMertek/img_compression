@@ -16,28 +16,39 @@ class ImageOptimizerHandler (FileSystemEventHandler):
 
     def optimize_event(self, file_path):
         try:
+        
             with Image.open(file_path) as img:
+                original_size = os.path.getsize(file_path)  
+            
+            
                 if img.width > MAX_WIDTH:
                     ratio = MAX_WIDTH / img.width
-                    new_size = (MAX_WIDTH,  int(img.height*ratio))
+                    new_size = (MAX_WIDTH, int(img.height * ratio))
                     img = img.resize(new_size, Image.ANTIALIAS)
-                
+
+            # Convert PNG to JPEG for better compression
                 optimized_path = os.path.join(OPTIMIZED_FOLDER, os.path.basename(file_path))
+                temp_path = optimized_path + "_temp.jpg"  
 
                 if img.mode in ("RGBA", "P"):
                     img = img.convert("RGB")
-                    temp_path = optimized_path.rsplit(".",1)[0] + ".jpg"
+                    temp_path = temp_path.rsplit(".", 1)[0] + ".jpg"
 
-                img.save(optimized_path, "JPEG", quality=QUALITY)
+            
+                img.save(temp_path, "JPEG", quality=QUALITY)
+
                 optimized_size = os.path.getsize(temp_path)
 
-                print(f"Optimized: {file_path}=>{optimized_path}")
-
-               # if optimized_size< original_size:
-
+            
+                if optimized_size < original_size:
+                    os.rename(temp_path, optimized_path)
+                    print(f"Optimized and saved: {file_path} -> {optimized_path} (Reduced size: {original_size} -> {optimized_size} bytes)")
+                else:
+                    os.remove(temp_path)
+                    print(f"Skipped optimization for {file_path} (Optimized file was larger)")
 
         except Exception as e:
-            print(f"error processing {file_path}: {e}")
+            print(f"Error processing {file_path}: {e}")
 
 
 
