@@ -6,7 +6,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from PIL import Image
 
-with open("config.json", "r") as config_file:
+with open("configuration.json", "r") as config_file:
     config = json.load(config_file)
 
 WATCH_FOLDER = config["WATCH_FOLDER"]
@@ -16,6 +16,7 @@ QUALITY = config["QUALITY"]
 
 
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
+
 
 class ImageOptimizerHandler (FileSystemEventHandler):
     
@@ -52,7 +53,7 @@ class ImageOptimizerHandler (FileSystemEventHandler):
                 img.save(temp_path, "JPEG", quality=QUALITY)
 
                 optimized_size = os.path.getsize(temp_path)
-                loggin.debug(f"optimized size: {optimized_size} bytes")
+                logging.debug(f"optimized size: {optimized_size} bytes")
 
             
                 if optimized_size < original_size:
@@ -75,7 +76,9 @@ class ImageOptimizerHandler (FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-
+    if not os.path.exists(WATCH_FOLDER):
+        logging.error(f"Watch folder {WATCH_FOLDER} does not exist!")
+        exit(1)
     logging.info(f"starting folder monitoring: {WATCH_FOLDER}")
     event_handler= ImageOptimizerHandler()
     observer = Observer()
