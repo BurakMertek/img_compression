@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from PIL import Image
@@ -8,6 +9,8 @@ from configuration import *
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
 
 class ImageOptimizerHandler (FileSystemEventHandler):
+    
+    
     def on_created(self, event):
         if event.is_directory:
             return
@@ -49,7 +52,8 @@ class ImageOptimizerHandler (FileSystemEventHandler):
 
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
-
+    logging.basicConfig(filename="image_optimizer.log", level=logging.INFO)
+    logging.info(f"Optimized: {file_path} -> {optimized_path} (Reduced size: {original_size} -> {optimized_size} bytes)")
 
 
 if __name__ == "__main__":
