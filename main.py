@@ -45,27 +45,36 @@ class ImageOptimizerHandler (FileSystemEventHandler):
             
                 if optimized_size < original_size:
                     os.rename(temp_path, optimized_path)
-                    print(f"Optimized and saved: {file_path} -> {optimized_path} (Reduced size: {original_size} -> {optimized_size} bytes)")
+                    logging.info(f"Optimized and saved: {file_path} -> {optimized_path} (Reduced size: {original_size} -> {optimized_size} bytes)")
                 else:
                     os.remove(temp_path)
-                    print(f"Skipped optimization for {file_path} (Optimized file was larger)")
+                    logging.info(f"Skipped optimization for {file_path} (Optimized file was larger)")
 
         except Exception as e:
-            print(f"Error processing {file_path}: {e}")
-    logging.basicConfig(filename="image_optimizer.log", level=logging.INFO)
+            logging.error(f"Error processing {file_path}: {e}")
+
+    logging.basicConfig(
+        filename = "image_optimizer.log",
+        level=logging.DEBUG,
+        format="%(asctime)s-%(levelname)s-%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
     logging.info(f"Optimized: {file_path} -> {optimized_path} (Reduced size: {original_size} -> {optimized_size} bytes)")
 
 
 if __name__ == "__main__":
+
+    logging.info(f"starting folder monitoring: {WATCH_FOLDER}")
     event_handler= ImageOptimizerHandler()
     observer = Observer()
     observer.schedule(event_handler, WATCH_FOLDER, recursive= False)
     observer.start()
-    print(f"monitoring folder: {WATCH_FOLDER}")
+    
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        logging.info(f"stopping folder monitoring due to keyboard interrupt.")
         observer.stop()
     observer.join()
 
