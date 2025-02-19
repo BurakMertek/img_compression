@@ -21,12 +21,14 @@ class ImageOptimizerHandler (FileSystemEventHandler):
         try:
         
             with Image.open(file_path) as img:
-                original_size = os.path.getsize(file_path)  
+                original_size = os.path.getsize(file_path)
+                logging.debug(f"Original size: {original_size} bytes")  
             
             
                 if img.width > MAX_WIDTH:
                     ratio = MAX_WIDTH / img.width
                     new_size = (MAX_WIDTH, int(img.height * ratio))
+                    logging.debug(f"resizing image to: {new_size}")
                     img = img.resize(new_size, Image.ANTIALIAS)
 
             # Convert PNG to JPEG for better compression
@@ -35,12 +37,13 @@ class ImageOptimizerHandler (FileSystemEventHandler):
 
                 if img.mode in ("RGBA", "P"):
                     img = img.convert("RGB")
-                    temp_path = temp_path.rsplit(".", 1)[0] + ".jpg"
+                    logging.debug(f"converted image to RGB mode")
 
             
                 img.save(temp_path, "JPEG", quality=QUALITY)
 
                 optimized_size = os.path.getsize(temp_path)
+                loggin.debug(f"optimized size: {optimized_size} bytes")
 
             
                 if optimized_size < original_size:
