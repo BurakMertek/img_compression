@@ -1,10 +1,19 @@
 import os
 import time
 import logging
+import json
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from PIL import Image
-from configuration import *
+
+with open("config.json", "r") as config_file:
+    config = json.load(config_file)
+
+WATCH_FOLDER = config["WATCH_FOLDER"]
+OPTIMIZED_FOLDER = config["OPTIMIZED_FOLDER"]
+MAX_WIDTH = config["MAX_WIDTH"]
+QUALITY = config["QUALITY"]
+
 
 os.makedirs(OPTIMIZED_FOLDER, exist_ok=True)
 
